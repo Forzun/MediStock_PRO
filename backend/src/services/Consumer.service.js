@@ -4,26 +4,32 @@ const ApiError = require("../utils/ApiError")
 class ConsumerService{
 
 
-    static async RegisterConsumer(user,body){
-        
-        const {name,email,mobile,dob,address} = body
+    static async RegisterConsumer(userId, body) {
+        try {
+            const { email } = body;
 
-        const checkExist = await ConsumerModel.findOne({email:email,user:user});
-
-        if(checkExist){
-            throw new ApiError(httpStatus.BAD_REQUEST,"Consumer Already in Record");
-            return
-        }
-
-            await ConsumerModel.create({
-                name,email,mobile,dob,address,user
-            })
-
-            return {
-                msg:"Consumer Added :)"
+            // Check if consumer exists
+            const exists = await ConsumerModel.findOne({ email, createdBy: userId });
+            if (exists) {
+                throw new ApiError(409, "Consumer already exists");
             }
 
-        
+            // Create consumer
+            const consumer = await ConsumerModel.create({
+                ...body,
+                createdBy: userId
+            });
+
+            return {
+                success: true,
+                statusCode: 201,
+                msg: "Consumer registered successfully",
+                consumer
+            };
+        } catch (error) {
+            if (error instanceof ApiError) throw error;
+            throw new ApiError(500, "Error registering consumer");
+        }
     }
 
     static async DeleteConsumer(user,id){
@@ -45,74 +51,66 @@ class ConsumerService{
 
         
     }
-    static async getById(user,id){
-         
+    static async getById(userId, consumerId) {
+        try {
+            const consumer = await ConsumerModel.findOne({
+                _id: consumerId,
+                createdBy: userId
+            });
 
-        const checkExist = await ConsumerModel.findOne({_id:id,user:user});
-
-        console.log({user,id});
-
-        if(!checkExist){
-            throw new ApiError(httpStatus.BAD_REQUEST,"Consumer Not Found in Record");
-            return
-        }
-
-                
-
-            return {
-                user:checkExist
+            if (!consumer) {
+                throw new ApiError(404, "Consumer not found");
             }
 
-        
+            return {
+                success: true,
+                statusCode: 200,
+                msg: "Consumer fetched successfully",
+                consumer
+            };
+        } catch (error) {
+            if (error instanceof ApiError) throw error;
+            throw new ApiError(500, "Error fetching consumer");
+        }
     }
 
     
 
-    static async GetAllUser(user,page=1,query=''){
+    static async GetAllUser(userId, page = 1, query = "") {
+        try {
             const limit = 10;
-                const skip = (Number(page)-1)*limit
+            const skip = (page - 1) * limit;
 
-                const queryies = {
-                    user,
-                   $or:[
-                    {
-                         name: new RegExp(query)
-                    },
-                    {
-                         email: new RegExp(query)
-                    },
-                    {
-                         address: new RegExp(query)
-                    },
-                    {
-                         mobile: new RegExp(query)
-                    },
-                   ]
-                }
+            const filter = {
+                createdBy: userId,
+                $or: [
+                    { name: { $regex: query, $options: "i" } },
+                    { email: { $regex: query, $options: "i" } }
+                ]
+            };
 
+            const consumers = await ConsumerModel.find(filter)
+                .skip(skip)
+                .limit(limit)
+                .sort({ createdAt: -1 });
 
-       const data =  await ConsumerModel.find(queryies).select("name email mobile")
-                    .skip(skip)
-                    .limit(limit)
-       ;
-
-        //total document
-
-        const totalConsumer = await ConsumerModel.countDocuments(queryies)
-
-
-        //hasmore
-        const hasMore= skip+limit<totalConsumer
-
+            const total = await ConsumerModel.countDocuments(filter);
 
             return {
-                users:data,
-                more:hasMore
-            }
-
-
-
-
+                success: true,
+                statusCode: 200,
+                msg: "Consumers fetched successfully",
+                consumers,
+                pagination: {
+                    total,
+                    pages: Math.ceil(total / limit),
+                    current: page,
+                    perPage: limit
+                }
+            };
+        } catch (error) {
+            throw new ApiError(500, "Error fetching consumers");
+        }
     }
     
     static async updateById(user,body,id){

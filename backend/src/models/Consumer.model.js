@@ -1,4 +1,4 @@
-const mongoose = require("mongoose")
+const mongoose = require('mongoose');
 
 const consumerSchema = new mongoose.Schema({
     name: {
@@ -26,17 +26,13 @@ const consumerSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    user: {
+    createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
-    },
-    isActive: {
-        type: Boolean,
-        default: true
     }
 }, {
     timestamps: true
-})
+});
 
-module.exports = mongoose.model("Consumer", consumerSchema)
+module.exports = mongoose.model('Consumer', consumerSchema); 

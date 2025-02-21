@@ -1,19 +1,19 @@
 const {body} = require("express-validator")
 class AuthValidation {
 
-
     static RegisterUser = [
-            body("token").notEmpty().withMessage("token is Required"),
+            // Make token optional since it's for reCAPTCHA
+            body("token").optional(),
             body("name").notEmpty().withMessage("name can not be empty"),
-            body("email").isEmail().withMessage("email must be valid").notEmpty().withMessage("name can not be empty"),
+            body("email").isEmail().withMessage("email must be valid").notEmpty().withMessage("email can not be empty"),
             body("password").isLength({min:6}).withMessage("password include mininum 6 characters").notEmpty().withMessage("password is required")
     ]
- static LoginUser = [ 
-        //     body("token").notEmpty().withMessage("token is Required"),
-            body("email").isEmail().withMessage("email must be valid").notEmpty().withMessage("name can not be empty"),
+
+    static LoginUser = [ 
+            body("email").isEmail().withMessage("email must be valid").notEmpty().withMessage("email can not be empty"),
             body("password").isLength({min:6}).withMessage("password include mininum 6 characters").notEmpty().withMessage("password is required")
     ]   
 
 }
 
-module.exports =AuthValidation
+module.exports = AuthValidation

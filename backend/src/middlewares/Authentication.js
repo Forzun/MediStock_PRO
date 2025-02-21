@@ -1,28 +1,25 @@
-const httpStatus = require("http-status")
-const ApiError = require("../utils/ApiError")
-const { validateToken } = require("../utils/Token.utils")
+const ApiError = require('../utils/ApiError');
+const httpStatus = require('http-status');
+const { validateToken } = require('../utils/Token.utils');
 
-const Authentication = (req,res,next)=>{
+const Authentication = (req, res, next) => {
     try {
-                const headers = req.headers['authorization'] || ''
+        const token = req.headers.authorization?.split(' ')[1];
+        
+        if (!token) {
+            throw new ApiError(httpStatus.UNAUTHORIZED, 'Token is required');
+        }
 
-                if(!headers  || !headers.startsWith("Bearer ")){
-                    throw new ApiError(httpStatus.UNAUTHORIZED,"Please Login first")
-                }
-
-                const auth_token = headers.split(" ")[1]
-
-                if(!auth_token){
-                    throw new ApiError(httpStatus.UNAUTHORIZED,"Please Provide valid")
-                }
-
-                const data =validateToken(auth_token)
-                req.user =data.userid
-                next()
-
+        try {
+            const decoded = validateToken(token);
+            req.user = decoded.userid;
+            next();
+        } catch (error) {
+            throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid or expired token');
+        }
     } catch (error) {
-                next(error)
+        next(error);
     }
-}
+};
 
-module.exports =Authentication
+module.exports = Authentication;

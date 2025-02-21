@@ -1,8 +1,7 @@
 const jwt = require("jsonwebtoken")
-const { PUBLIC_DATA } = require("../../constant")
 
 exports.generatoken = (user,expire='1d')=>{
-    const token = jwt.sign({userid:user._id},PUBLIC_DATA.jwt_auth,{
+    const token = jwt.sign({userid:user._id},process.env.JWT_AUTH,{
         expiresIn:expire
     })
     return token
@@ -10,6 +9,6 @@ exports.generatoken = (user,expire='1d')=>{
 
 
 exports.validateToken = (token)=>{
-    const tokens = jwt.verify(token,PUBLIC_DATA.jwt_auth )
-    return tokens
+    const decoded = jwt.verify(token,process.env.JWT_AUTH)
+    return decoded
 }

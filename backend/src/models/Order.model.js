@@ -1,4 +1,4 @@
-const mongoose = require("mongoose")
+const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
     consumer: {
@@ -37,13 +37,13 @@ const orderSchema = new mongoose.Schema({
         enum: ['cash', 'card', 'upi'],
         required: true
     },
-    user: {
+    createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     }
 }, {
     timestamps: true
-})
+});
 
-module.exports = mongoose.model("Order", orderSchema)
+module.exports = mongoose.model('Order', orderSchema); 

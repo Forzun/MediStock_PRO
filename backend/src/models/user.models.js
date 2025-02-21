@@ -12,7 +12,8 @@ const Schema = new mongoose.Schema({
                 trim:true,
                 lower:true,
                 required:[true,"Email is required"]
-            }  ,password:{
+            }, 
+            password:{
                 type:String, 
                 trim:true, 
                 required:[true,"Password is required"]
@@ -22,5 +23,5 @@ const Schema = new mongoose.Schema({
 
 // 
 
-const model = mongoose.model("user",Schema)
+const model = mongoose.model("User",Schema)
 module.exports= model

@@ -1,13 +1,10 @@
-class ApiError extends Error{
-    statusCode = 500
-    constructor(statusCode,msg){
-        super(msg)
-        this.message = msg
-        this.statusCode  = statusCode;
-
-        // Error.
-
+class ApiError extends Error {
+    constructor(statusCode, message) {
+        super(message);
+        this.statusCode = statusCode;
+        this.message = message;
+        Error.captureStackTrace(this, this.constructor);
     }
 }
 
-module.exports =ApiError
+module.exports = ApiError;

@@ -1,19 +1,19 @@
 const mongoose = require("mongoose")
 
-const Schema = new mongoose.Schema({
+const profileSchema = new mongoose.Schema({
            user:{
             type:mongoose.Schema.Types.ObjectId,
-            ref:'user',
+            ref:'User',
             required:true
            },
            refresh_token:{
             type:String,
-            default:''
+            required:true
            }
 },{timestamps:true})
 
 
 // 
 
-const model = mongoose.model("profile",Schema)
+const model = mongoose.model("Profile",profileSchema)
 module.exports= model
