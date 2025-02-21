@@ -24,12 +24,6 @@ class OrdersController{
                 return    res.status(httpStatus.OK).json(res_obj)
                  
             })
-
-
-            
-            
-            
-
         }
 
         

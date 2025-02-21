@@ -55,44 +55,43 @@ class AuthService{
                 }    
 
        }
-        static  async LoginUser(body){
-        const {email,password,name,token} = body
+        static  async LoginUser(body) {
+            try {
+                const { email, password } = body
 
-        
-                const response = await axios.post(`https://www.google.com/recaptcha/api/siteverify`,{},{
-                    params:{
-                    secret:process.env.CAPTCHA_SCREATE_KEY,
-                    response:token,
-                }
-                })
-
-                const data =await response.data;
-                // console.log("2---- ",JSON.stringify(data));
-
-                if(!data.success){
-                        // console.log("yhhh it works"); 
-
-                        throw new ApiError(httpStatus.BAD_REQUEST,"Captcha Not Valid")
-                }
-                const checkExist = await UserModel.findOne({email})
-                if(!checkExist){
-                    throw new ApiError(httpStatus.BAD_REQUEST,"User Not Regisrered")
-                    return
+                // Validate input
+                if (!email || !password) {
+                    throw new ApiError(httpStatus.BAD_REQUEST, "Email and password are required")
                 }
 
-                if(password !==checkExist.password){
- throw new ApiError(httpStatus.BAD_REQUEST,"Invalid Credentials")
-                    return
+                // Find user
+                const user = await UserModel.findOne({ email })
+                if (!user) {
+                    throw new ApiError(httpStatus.BAD_REQUEST, "User Not Registered")
                 }
-             
-   const tokend = generatoken(checkExist) 
-              
+
+                // Verify password
+                if (password !== user.password) {  // Note: In production, use proper password hashing
+                    throw new ApiError(httpStatus.BAD_REQUEST, "Invalid Credentials")
+                }
+
+                // Generate token
+                const token = generatoken(user)
+
                 return {
-                    msg:"User Login Successflly",
-                    token:tokend
-                }    
+                    msg: "User Login Successfully",
+                    token: token,
+                    user: {
+                        name: user.name,
+                        email: user.email
+                    }
+                }
 
-       }
+            } catch (error) {
+                console.error("Login error:", error);
+                throw error instanceof ApiError ? error : new ApiError(500, "Login failed")
+            }
+        }
          static  async ProfileService(user){ 
 
                       const checkExist = await UserModel.findById(user).select("name email")
